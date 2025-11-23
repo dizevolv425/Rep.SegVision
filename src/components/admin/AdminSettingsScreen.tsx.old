@@ -1,0 +1,936 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Switch } from '../ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Badge } from '../ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { 
+  Users, 
+  Shield, 
+  Plus,
+  Edit,
+  Trash2,
+  MoreVertical,
+  Lock,
+  User,
+  Upload,
+  AlertCircle,
+  CheckCircle,
+  Bell,
+  Image
+} from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
+import { showToast } from '../ui/toast-utils';
+import { useIsMobile } from '../ui/use-mobile';
+
+interface InternalUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'operador';
+  status: 'active' | 'inactive';
+  lastAccess: string;
+}
+
+const mockUsers: InternalUser[] = [
+  {
+    id: '1',
+    name: 'Carlos Administrador',
+    email: 'carlos@segvision.com',
+    role: 'admin',
+    status: 'active',
+    lastAccess: '2024-06-20 14:30'
+  },
+  {
+    id: '2',
+    name: 'Ana Operadora',
+    email: 'ana@segvision.com',
+    role: 'operador',
+    status: 'active',
+    lastAccess: '2024-06-20 13:15'
+  },
+  {
+    id: '3',
+    name: 'João Silva',
+    email: 'joao@segvision.com',
+    role: 'operador',
+    status: 'inactive',
+    lastAccess: '2024-06-19 16:45'
+  },
+];
+
+export function AdminSettingsScreen() {
+  const [users, setUsers] = useState<InternalUser[]>(mockUsers);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  // Security Settings
+  const [inactivityTime, setInactivityTime] = useState('30');
+  const [maxLoginAttempts, setMaxLoginAttempts] = useState('5');
+  const [passwordExpiration, setPasswordExpiration] = useState('90');
+
+  // Profile state
+  const [name, setName] = useState('Admin SegVision');
+  const [email, setEmail] = useState('admin@segvision.com');
+  const [phone, setPhone] = useState('(11) 99999-8888');
+  const [cargo, setCargo] = useState('Administrador do Sistema');
+  const [theme, setTheme] = useState('sistema');
+  const [language, setLanguage] = useState('pt-BR');
+
+  // Password state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Notification settings state
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [alertsNewSchool, setAlertsNewSchool] = useState(true);
+  const [alertsPaymentFailed, setAlertsPaymentFailed] = useState(true);
+  const [alertsSystemUpdate, setAlertsSystemUpdate] = useState(false);
+  const [alertsWeeklyReport, setAlertsWeeklyReport] = useState(true);
+
+  // User form state
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState<'admin' | 'operador'>('operador');
+
+  // Platform branding state
+  const [platformName, setPlatformName] = useState('SegVision');
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  const getRoleBadge = (role: 'admin' | 'operador') => {
+    if (role === 'admin') {
+      return <Badge variant="heavy" tone="primary" size="s">Administrador</Badge>;
+    }
+    return <Badge variant="light" tone="neutral" size="s">Operador</Badge>;
+  };
+
+  const getStatusBadge = (status: 'active' | 'inactive') => {
+    if (status === 'active') {
+      return <Badge variant="medium" tone="success" size="s">Ativo</Badge>;
+    }
+    return <Badge variant="light" tone="neutral" size="s">Inativo</Badge>;
+  };
+
+  const handleAddUser = () => {
+    if (!newUserName || !newUserEmail) {
+      showToast.error({ title: 'Preencha todos os campos obrigatórios' });
+      return;
+    }
+
+    const newUser: InternalUser = {
+      id: Date.now().toString(),
+      name: newUserName,
+      email: newUserEmail,
+      role: newUserRole,
+      status: 'active',
+      lastAccess: 'Nunca acessou'
+    };
+
+    setUsers([...users, newUser]);
+    setNewUserName('');
+    setNewUserEmail('');
+    setNewUserRole('operador');
+    setIsAddUserOpen(false);
+    showToast.success({ title: 'Convite enviado com sucesso', description: 'O usuário receberá um e-mail para ativar a conta' });
+  };
+
+  const handleDeleteUser = () => {
+    if (userToDelete) {
+      setUsers(users.filter(u => u.id !== userToDelete));
+      showToast.success({ title: 'Usuário removido com sucesso' });
+      setUserToDelete(null);
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const handleSaveSecuritySettings = () => {
+    const time = parseInt(inactivityTime);
+    const attempts = parseInt(maxLoginAttempts);
+    const expiration = parseInt(passwordExpiration);
+
+    if (time < 5) {
+      showToast.error({ title: 'Tempo de inatividade deve ser no mínimo 5 minutos' });
+      return;
+    }
+
+    if (attempts < 3 || attempts > 10) {
+      showToast.error({ title: 'Tentativas de login devem estar entre 3 e 10' });
+      return;
+    }
+
+    if (expiration < 30 || expiration > 180) {
+      showToast.error({ title: 'Expiração de senha deve estar entre 30 e 180 dias' });
+      return;
+    }
+
+    showToast.success({ title: 'Configurações de segurança atualizadas' });
+  };
+
+  const handleSaveProfile = () => {
+    if (!name || !email) {
+      showToast.error({ title: 'Nome e e-mail são obrigatórios' });
+      return;
+    }
+    showToast.success({ title: 'Perfil atualizado com sucesso' });
+  };
+
+  const handleChangePassword = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showToast.error({ title: 'Preencha todos os campos de senha' });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showToast.error({ title: 'As senhas não coincidem' });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showToast.error({ title: 'A senha deve ter no mínimo 8 caracteres' });
+      return;
+    }
+
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    showToast.success({ title: 'Senha alterada com sucesso' });
+  };
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        showToast.error({ title: 'Arquivo muito grande', description: 'O tamanho máximo é 2MB' });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSavePlatformBranding = () => {
+    if (!platformName || platformName.length < 3) {
+      showToast.error({ title: 'Nome da plataforma deve ter no mínimo 3 caracteres' });
+      return;
+    }
+    showToast.success({ title: 'Configurações da plataforma atualizadas' });
+  };
+
+  const totalUsers = users.length;
+  const totalAdmins = users.filter(u => u.role === 'admin').length;
+  const totalOperators = users.filter(u => u.role === 'operador').length;
+
+  return (
+    <div className="space-y-6">
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="mb-6 gap-2">
+          <TabsTrigger value="profile" className="px-4 dark:data-[state=active]:bg-[#2F5FFF] dark:data-[state=active]:text-white">
+            Meu Perfil
+          </TabsTrigger>
+          <TabsTrigger value="platform" className="px-4 dark:data-[state=active]:bg-[#2F5FFF] dark:data-[state=active]:text-white hidden sm:flex">
+            Plataforma
+          </TabsTrigger>
+          <TabsTrigger value="users" className="px-4 dark:data-[state=active]:bg-[#2F5FFF] dark:data-[state=active]:text-white hidden sm:flex">
+            Usuários Internos
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="px-4 dark:data-[state=active]:bg-[#2F5FFF] dark:data-[state=active]:text-white hidden sm:flex">
+            Notificações
+          </TabsTrigger>
+          <TabsTrigger value="security" className="px-4 dark:data-[state=active]:bg-[#2F5FFF] dark:data-[state=active]:text-white hidden sm:flex">
+            Segurança Global
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Tab: Meu Perfil */}
+        <TabsContent value="profile" className="space-y-6 mt-6">
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]">Dados da Conta</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center gap-6">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full bg-[var(--primary-bg)] flex items-center justify-center text-white">
+                    <User className="h-12 w-12" />
+                  </div>
+                  <Button
+                    size="sm"
+                    className="absolute bottom-0 right-0 rounded-full h-8 w-8 p-0 bg-[var(--primary-bg)] text-white hover:opacity-96"
+                  >
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div>
+                  <p className="text-[var(--neutral-text)]">Foto de perfil</p>
+                  <p className="text-sm text-[var(--neutral-text-muted)]">
+                    JPG, PNG ou GIF. Máximo 2MB.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="profileName" className="text-[var(--neutral-text)]">Nome *</Label>
+                  <Input
+                    id="profileName"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="border-[var(--neutral-border)]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="profileEmail" className="text-[var(--neutral-text)]">E-mail *</Label>
+                  <Input
+                    id="profileEmail"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border-[var(--neutral-border)]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="profilePhone" className="text-[var(--neutral-text)]">Telefone</Label>
+                  <Input
+                    id="profilePhone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="border-[var(--neutral-border)]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="profileCargo" className="text-[var(--neutral-text)]">Cargo</Label>
+                  <Input
+                    id="profileCargo"
+                    value={cargo}
+                    onChange={(e) => setCargo(e.target.value)}
+                    className="border-[var(--neutral-border)]"
+                  />
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleSaveProfile}
+                className="bg-[var(--primary-bg)] text-white hover:opacity-96"
+              >
+                Salvar Alterações
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]">Preferências</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="theme" className="text-[var(--neutral-text)]">Tema</Label>
+                <Select value={theme} onValueChange={setTheme}>
+                  <SelectTrigger className="border-[var(--neutral-border)]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[var(--card)] border-[var(--neutral-border)]">
+                    <SelectItem value="sistema">Sistema</SelectItem>
+                    <SelectItem value="claro">Claro</SelectItem>
+                    <SelectItem value="escuro">Escuro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="language" className="text-[var(--neutral-text)]">Idioma</Label>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="border-[var(--neutral-border)]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[var(--card)] border-[var(--neutral-border)]">
+                    <SelectItem value="pt-BR">Português (BR)</SelectItem>
+                    <SelectItem value="en-US">English (US)</SelectItem>
+                    <SelectItem value="es-ES">Español (ES)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]">Segurança</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="currentPass" className="text-[var(--neutral-text)]">Senha Atual</Label>
+                <Input
+                  id="currentPass"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="border-[var(--neutral-border)]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newPass" className="text-[var(--neutral-text)]">Nova Senha</Label>
+                <Input
+                  id="newPass"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="border-[var(--neutral-border)]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPass" className="text-[var(--neutral-text)]">Confirmar Nova Senha</Label>
+                <Input
+                  id="confirmPass"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="border-[var(--neutral-border)]"
+                />
+              </div>
+
+              <Button 
+                onClick={handleChangePassword}
+                className="bg-[var(--primary-bg)] text-white hover:opacity-96"
+              >
+                Alterar Senha
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab: Plataforma */}
+        <TabsContent value="platform" className="space-y-6 mt-6">
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]\">Logotipo da Sidebar</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Upload Area */}
+                <div className="flex-1 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="logoUpload" className="text-[var(--neutral-text)]">
+                      Upload do Logotipo *
+                    </Label>
+                    <Input
+                      id="logoUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="border-[var(--neutral-border)]"
+                    />
+                    <p className="text-sm text-[var(--neutral-text-muted)]">
+                      PNG, SVG ou JPG. Recomendado: Fundo transparente, proporção quadrada. Máximo 2MB.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="platformName" className="text-[var(--neutral-text)]">
+                      Nome da Plataforma
+                    </Label>
+                    <Input
+                      id="platformName"
+                      value={platformName}
+                      onChange={(e) => setPlatformName(e.target.value)}
+                      className="border-[var(--neutral-border)]"
+                      placeholder="SegVision"
+                    />
+                    <p className="text-sm text-[var(--neutral-text-muted)]">
+                      Será exibido ao lado do logotipo na sidebar
+                    </p>
+                  </div>
+                </div>
+
+                {/* Preview Area */}
+                <div className="flex-1">
+                  <Label className="text-[var(--neutral-text)] mb-2 block">Preview da Sidebar</Label>
+                  <div className="w-full h-[200px] bg-[var(--sidebar)] rounded-lg p-4 flex flex-col">
+                    <div className="flex items-center gap-3">
+                      {logoPreview ? (
+                        <img 
+                          src={logoPreview} 
+                          alt="Logo Preview" 
+                          className="w-10 h-10 object-contain rounded"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-[var(--sidebar-foreground)]/20 flex items-center justify-center">
+                          <Image className="h-6 w-6 text-[var(--sidebar-foreground)]/40" />
+                        </div>
+                      )}
+                      <h1 className="text-xl text-[var(--sidebar-foreground)]">
+                        {platformName || 'SegVision'}
+                      </h1>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-[var(--sidebar-border)] opacity-35">
+                      <p className="text-xs text-[var(--sidebar-foreground)]/60">
+                        Preview da aparência na sidebar
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleSavePlatformBranding}
+                className="bg-[var(--primary-bg)] text-white hover:opacity-96"
+              >
+                Salvar Alterações
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab: Usuários Internos */}
+        <TabsContent value="users" className="space-y-6 mt-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="border-[var(--neutral-border)]">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-[var(--neutral-text-muted)]">Total de Usuários</p>
+                    <h4 className="text-[var(--neutral-text)] mt-1">{totalUsers}</h4>
+                  </div>
+                  <Users className="h-8 w-8 text-[var(--primary-bg)]" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-[var(--neutral-border)]">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-[var(--neutral-text-muted)]">Administradores</p>
+                    <h4 className="text-[var(--neutral-text)] mt-1">{totalAdmins}</h4>
+                  </div>
+                  <Shield className="h-8 w-8 text-[var(--primary-bg)]" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-[var(--neutral-border)]">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-[var(--neutral-text-muted)]">Operadores</p>
+                    <h4 className="text-[var(--neutral-text)] mt-1">{totalOperators}</h4>
+                  </div>
+                  <User className="h-8 w-8 text-[var(--primary-bg)]" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Users Table */}
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-[var(--neutral-text)]">Gerenciar Usuários</CardTitle>
+                <Button
+                  size="sm"
+                  className="bg-[var(--primary-bg)] text-white hover:opacity-96"
+                  onClick={() => setIsAddUserOpen(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Usuário
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[var(--neutral-border)]">
+                      <th className="text-left py-3 px-4 text-[var(--neutral-text)]">Nome</th>
+                      <th className="text-left py-3 px-4 text-[var(--neutral-text)] hidden md:table-cell">E-mail</th>
+                      <th className="text-left py-3 px-4 text-[var(--neutral-text)]">Role</th>
+                      <th className="text-left py-3 px-4 text-[var(--neutral-text)]">Status</th>
+                      <th className="text-left py-3 px-4 text-[var(--neutral-text)] hidden lg:table-cell">Último Acesso</th>
+                      <th className="text-right py-3 px-4 text-[var(--neutral-text)]">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr key={user.id} className="border-b border-[var(--neutral-border)] hover:bg-[var(--neutral-subtle)]">
+                        <td className="py-3 px-4">
+                          <p className="text-[var(--neutral-text)]">{user.name}</p>
+                        </td>
+                        <td className="py-3 px-4 hidden md:table-cell">
+                          <p className="text-[var(--neutral-text-muted)]">{user.email}</p>
+                        </td>
+                        <td className="py-3 px-4">
+                          {getRoleBadge(user.role)}
+                        </td>
+                        <td className="py-3 px-4">
+                          {getStatusBadge(user.status)}
+                        </td>
+                        <td className="py-3 px-4 hidden lg:table-cell">
+                          <p className="text-sm text-[var(--neutral-text-muted)]">{user.lastAccess}</p>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-[var(--card)] border-[var(--neutral-border)]">
+                                <DropdownMenuItem className="cursor-pointer text-[var(--neutral-text)] hover:bg-[var(--neutral-subtle)]">
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="cursor-pointer text-[var(--red-alert-300)] hover:bg-[var(--neutral-subtle)]"
+                                  onClick={() => {
+                                    setUserToDelete(user.id);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab: Notificações */}
+        <TabsContent value="notifications" className="space-y-6 mt-6">
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]">Canais de Notificação</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-[var(--neutral-text)]">Notificações por E-mail</p>
+                  <p className="text-sm text-[var(--neutral-text-muted)]">
+                    Receber notificações por e-mail
+                  </p>
+                </div>
+                <Switch
+                  id="emailNotifications"
+                  checked={emailNotifications}
+                  onCheckedChange={(checked) => setEmailNotifications(checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-[var(--neutral-text)]">Notificações Push</p>
+                  <p className="text-sm text-[var(--neutral-text-muted)]">
+                    Receber notificaçes push no navegador
+                  </p>
+                </div>
+                <Switch
+                  id="pushNotifications"
+                  checked={pushNotifications}
+                  onCheckedChange={(checked) => setPushNotifications(checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]">Tipos de Notificação</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-[var(--neutral-text)]">Novas Escolas</p>
+                  <p className="text-sm text-[var(--neutral-text-muted)]">
+                    Alertas quando uma nova escola for cadastrada
+                  </p>
+                </div>
+                <Switch
+                  id="alertsNewSchool"
+                  checked={alertsNewSchool}
+                  onCheckedChange={(checked) => setAlertsNewSchool(checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-[var(--neutral-text)]">Pagamentos Falhados</p>
+                  <p className="text-sm text-[var(--neutral-text-muted)]">
+                    Alertas de problemas com pagamentos
+                  </p>
+                </div>
+                <Switch
+                  id="alertsPaymentFailed"
+                  checked={alertsPaymentFailed}
+                  onCheckedChange={(checked) => setAlertsPaymentFailed(checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-[var(--neutral-text)]">Atualizações do Sistema</p>
+                  <p className="text-sm text-[var(--neutral-text-muted)]">
+                    Notificações sobre atualizações e manutenções
+                  </p>
+                </div>
+                <Switch
+                  id="alertsSystemUpdate"
+                  checked={alertsSystemUpdate}
+                  onCheckedChange={(checked) => setAlertsSystemUpdate(checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-[var(--neutral-text)]">Relatórios Semanais</p>
+                  <p className="text-sm text-[var(--neutral-text-muted)]">
+                    Resumos semanais de atividades e métricas
+                  </p>
+                </div>
+                <Switch
+                  id="alertsWeeklyReport"
+                  checked={alertsWeeklyReport}
+                  onCheckedChange={(checked) => setAlertsWeeklyReport(checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab: Segurança Global */}
+        <TabsContent value="security" className="space-y-6 mt-6">
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]">Configurações de Segurança</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="inactivity" className="text-[var(--neutral-text)]">
+                  Tempo de Inatividade (minutos) *
+                </Label>
+                <Input
+                  id="inactivity"
+                  type="number"
+                  min="5"
+                  value={inactivityTime}
+                  onChange={(e) => setInactivityTime(e.target.value)}
+                  className="border-[var(--neutral-border)]"
+                />
+                <p className="text-sm text-[var(--neutral-text-muted)]">
+                  Tempo mínimo: 5 minutos
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="loginAttempts" className="text-[var(--neutral-text)]">
+                  Tentativas Máximas de Login *
+                </Label>
+                <Input
+                  id="loginAttempts"
+                  type="number"
+                  min="3"
+                  max="10"
+                  value={maxLoginAttempts}
+                  onChange={(e) => setMaxLoginAttempts(e.target.value)}
+                  className="border-[var(--neutral-border)]"
+                />
+                <p className="text-sm text-[var(--neutral-text-muted)]">
+                  Entre 3 e 10 tentativas
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="passwordExpiration" className="text-[var(--neutral-text)]">
+                  Expiração de Senha (dias) *
+                </Label>
+                <Input
+                  id="passwordExpiration"
+                  type="number"
+                  min="30"
+                  max="180"
+                  value={passwordExpiration}
+                  onChange={(e) => setPasswordExpiration(e.target.value)}
+                  className="border-[var(--neutral-border)]"
+                />
+                <p className="text-sm text-[var(--neutral-text-muted)]">
+                  Entre 30 e 180 dias
+                </p>
+              </div>
+
+              <Button 
+                onClick={handleSaveSecuritySettings}
+                className="bg-[var(--primary-bg)] text-white hover:opacity-96"
+              >
+                Salvar Configurações
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Security Log (Read-only) */}
+          <Card className="border-[var(--neutral-border)]">
+            <CardHeader>
+              <CardTitle className="text-[var(--neutral-text)]">Log de Segurança (Somente Leitura)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-lg border border-[var(--neutral-border)]">
+                  <CheckCircle className="h-5 w-5 text-[var(--success-bg)] flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-[var(--neutral-text)]">
+                      Login bem-sucedido - carlos@segvision.com
+                    </p>
+                    <p className="text-xs text-[var(--neutral-text-muted)] mt-1">
+                      Há 2 horas • IP: 192.168.1.100
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg border border-[var(--neutral-border)]">
+                  <AlertCircle className="h-5 w-5 text-[var(--warning-bg)] flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-[var(--neutral-text)]">
+                      Tentativa de login falhou - usuario@email.com
+                    </p>
+                    <p className="text-xs text-[var(--neutral-text-muted)] mt-1">
+                      Há 5 horas • IP: 203.45.67.89
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg border border-[var(--neutral-border)]">
+                  <CheckCircle className="h-5 w-5 text-[var(--success-bg)] flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-[var(--neutral-text)]">
+                      Configurações de segurança atualizadas
+                    </p>
+                    <p className="text-xs text-[var(--neutral-text-muted)] mt-1">
+                      Ontem às 14:30 • carlos@segvision.com
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Delete User Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-[var(--card)] border-[var(--neutral-border)]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[var(--neutral-text)]">Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="text-[var(--neutral-text-muted)]">
+              Tem certeza que deseja remover este usuário? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-[var(--neutral-border)] text-[var(--neutral-text)] hover:bg-[var(--neutral-subtle)]">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              className="bg-[var(--red-alert-300)] text-white hover:opacity-96"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+        <DialogContent className="bg-[var(--card)] border-[var(--neutral-border)]">
+          <DialogHeader>
+            <DialogTitle className="text-[var(--neutral-text)]">Adicionar Novo Usuário</DialogTitle>
+            <DialogDescription className="text-[var(--neutral-text-muted)]">
+              Preencha os dados do novo usuário. Um convite será enviado por e-mail.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="userName" className="text-[var(--neutral-text)]">Nome Completo *</Label>
+              <Input
+                id="userName"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                placeholder="Ex: João da Silva"
+                className="border-[var(--neutral-border)]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="userEmail" className="text-[var(--neutral-text)]">E-mail *</Label>
+              <Input
+                id="userEmail"
+                type="email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                placeholder="joao@segvision.com"
+                className="border-[var(--neutral-border)]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="userRole" className="text-[var(--neutral-text)]">Função *</Label>
+              <Select value={newUserRole} onValueChange={(value: 'admin' | 'operador') => setNewUserRole(value)}>
+                <SelectTrigger className="border-[var(--neutral-border)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[var(--card)] border-[var(--neutral-border)]">
+                  <SelectItem value="admin">Administrador</SelectItem>
+                  <SelectItem value="operador">Operador</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-[var(--neutral-text-muted)]">
+                Administradores têm acesso completo. Operadores têm acesso limitado.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsAddUserOpen(false)}
+              className="border-[var(--neutral-border)] text-[var(--neutral-text)] hover:bg-[var(--neutral-subtle)]"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleAddUser}
+              className="bg-[var(--primary-bg)] text-white hover:opacity-96"
+            >
+              Enviar Convite
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

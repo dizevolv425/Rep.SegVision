@@ -1,0 +1,488 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+
+  /* SegVision Palette - Blue Primary */
+  --blue-primary-50: #96bdf6;
+  --blue-primary-100: #54a2fa;
+  --blue-primary-200: #2f5fff;
+  --blue-primary-300: #161e53;
+  --blue-primary-400: #4a7fff;
+  --blue-primary-600: #0f2256; /* Border clara para dark mode */
+  --blue-primary-700: #0d1b4a;
+  --blue-primary-750: #0b1841;
+  --blue-primary-800: #0a1538;
+  --blue-primary-825: #071e48; /* Card background dark mode */
+  --blue-primary-850: #081229;
+  --blue-primary-900: #060e1f;
+  --blue-primary-950: #040a15;
+
+  /* SegVision Palette - Red Alert */
+  --red-alert-50: #fdc6c5;
+  --red-alert-100: #f87e81;
+  --red-alert-200: #f03948;
+  --red-alert-300: #c8142c;
+  --red-alert-400: #63000d;
+  --red-alert-600: #9d1020;
+  --red-alert-800: #4d0810;
+
+  /* SegVision Palette - Green Alert */
+  --green-alert-50: #e6ffe6;
+  --green-alert-100: #bdefb8;
+  --green-alert-200: #87e373;
+  --green-alert-300: #47d238;
+  --green-alert-400: #289726;
+  --green-alert-500: #025d00;
+  --green-alert-600: #1f7a1f;
+  --green-alert-800: #0d3d0d;
+
+  /* SegVision Palette - Turquoise Alert */
+  --turquoise-alert-50: #ebf6ff;
+  --turquoise-alert-100: #aadafd;
+  --turquoise-alert-200: #63bdf7;
+  --turquoise-alert-300: #20a4ed;
+  --turquoise-alert-400: #126aaf;
+  --turquoise-alert-600: #0e5589;
+  --turquoise-alert-800: #073853;
+
+  /* SegVision Palette - Orange Alert */
+  --orange-alert-50: #fffbe8;
+  --orange-alert-100: #feebae;
+  --orange-alert-200: #facd64;
+  --orange-alert-300: #f5a41d;
+  --orange-alert-400: #ba870b;
+  --orange-alert-600: #8a6408;
+  --orange-alert-800: #4a3604;
+
+  /* SegVision Palette - Yellow Alert */
+  --yellow-alert-50: #fffef0;
+  --yellow-alert-100: #fef7c3;
+  --yellow-alert-200: #fdec85;
+  --yellow-alert-300: #fadb3f;
+  --yellow-alert-400: #deb900;
+  --yellow-alert-500: #715700;
+  --yellow-alert-600: #9d8800;
+  --yellow-alert-800: #4f4600;
+
+  /* SegVision Palette - White */
+  --white-50: #ffffff;
+  --white-100: #fafafa;
+
+  /* SegVision Palette - Gray */
+  --gray-50: #f6f6f6;
+  --gray-100: #e2e2ea;
+  --gray-200: #b3b4c1;
+  --gray-300: #7a7a88;
+  --gray-400: #474748;
+
+  /* SegVision Palette - Black */
+  --black-50: #000000;
+  --black-100: #0f0f0f;
+  --black-200: #1d1d1d;
+  --black-300: #2c2c2c;
+
+  /* Semantic Tokens - Primary */
+  --primary-bg: var(--blue-primary-200);
+  --primary-bg-hover: var(--blue-primary-100);
+  --primary-bg-press: var(--blue-primary-300);
+  --primary-border: var(--blue-primary-200);
+  --primary-text-on: var(--white-50);
+
+  /* Semantic Tokens - Neutral */
+  --neutral-bg: var(--white-50);
+  --neutral-subtle: var(--gray-50);
+  --neutral-border: var(--gray-100);
+  --neutral-icon: var(--black-200);
+  --neutral-text: var(--black-300);
+  --neutral-text-muted: var(--black-200);
+  --neutral-inverse: var(--white-50);
+
+  /* Header Specific (Light) */
+  --header-bg: var(--white-50);
+
+  /* Header Specific (Light) */
+  --header-bg: var(
+    --white-50
+  ); /* Header background light mode */
+
+  /* Semantic Tokens - Feedback */
+  --success-bg: var(--green-alert-200);
+  --success-text: var(--black-300);
+  --success-border: var(--green-alert-300);
+  --caution-bg: var(--yellow-alert-400);
+  --caution-text: var(--black-300);
+  --caution-border: var(--yellow-alert-400);
+  --warning-bg: var(--orange-alert-300);
+  --warning-text: var(--black-300);
+  --warning-border: var(--orange-alert-400);
+  --danger-bg: var(--red-alert-300);
+  --danger-text-on: var(--white-50);
+  --danger-border: var(--red-alert-400);
+  --info-bg: var(--turquoise-alert-300);
+  --info-text: var(--black-300);
+  --info-border: var(--turquoise-alert-400);
+
+  /* Semantic Tokens - States */
+  --focus-ring: var(--blue-primary-100);
+  --disabled-bg: var(--gray-100);
+
+  /* Card Inner Elements */
+  --card-inner-bg: rgb(
+    243,
+    243,
+    249
+  ); /* Light gray for inner divs within cards */
+  --analytics-list-bg: #f3f3f9; /* Analytics screen list items - light mode */
+  --disabled-text: var(--black-100);
+  --table-row-hover: var(--gray-50);
+  --scrollbar-thumb: var(--gray-200); /* Scrollbar light mode */
+  --input-background: transparent; /* Transparent for light mode - adapts to card/container background */
+  --input-border: var(--gray-200);
+  --input-border-hover: var(--gray-300);
+  --input-text: var(--black-300);
+  --input-placeholder: var(--gray-300);
+
+  /* Sidebar Tokens (Light Mode) */
+  --sidebar: var(--blue-primary-300); /* #161E53 */
+  --sidebar-foreground: var(--white-100); /* Texto branco */
+  --sidebar-border: var(--white-100); /* Bordas brancas */
+
+  /* Legacy mapping for compatibility */
+  --background: var(--neutral-bg);
+  --foreground: var(--neutral-text);
+  --card: var(--neutral-bg);
+  --card-foreground: var(--neutral-text);
+  --popover: var(--neutral-bg);
+  --popover-foreground: var(--neutral-text);
+  --primary: var(--primary-bg);
+  --primary-foreground: var(--primary-text-on);
+  --secondary: var(--neutral-subtle);
+  --secondary-foreground: var(--neutral-text);
+  --muted: var(--neutral-subtle);
+  --muted-foreground: var(--neutral-text-muted);
+  --accent: var(--neutral-subtle);
+  --accent-foreground: var(--neutral-text);
+  --destructive: var(--danger-bg);
+  --destructive-foreground: var(--danger-text-on);
+  --border: var(--neutral-border);
+  --input: transparent;
+  --input-background: var(--neutral-bg);
+  --switch-background: var(--gray-200);
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: var(--focus-ring);
+  --chart-1: var(--blue-primary-300);
+  --chart-2: var(--turquoise-alert-300);
+  --chart-3: var(--green-alert-300);
+  --chart-4: var(--orange-alert-300);
+  --chart-5: var(--red-alert-300);
+  --radius: 0.625rem;
+  --sidebar: var(--blue-primary-300);
+  --sidebar-foreground: var(--white-100);
+  --sidebar-primary: var(--primary-bg);
+  --sidebar-primary-foreground: var(--white-100);
+  --sidebar-accent: var(--blue-primary-200);
+  --sidebar-accent-foreground: var(--white-100);
+  --sidebar-border: var(--blue-primary-200);
+  --sidebar-ring: var(--blue-primary-100);
+}
+
+.dark {
+  /* Badge Specific - Light variant in dark mode */
+  --badge-light-primary-bg: var(--blue-primary-800);
+  --badge-light-primary-border: var(--blue-primary-600);
+  --badge-light-primary-text: var(--blue-primary-300);
+
+  --badge-light-success-bg: var(--green-alert-800);
+  --badge-light-success-border: var(--green-alert-600);
+  --badge-light-success-text: var(--green-alert-300);
+
+  --badge-light-warning-bg: var(--orange-alert-800);
+  --badge-light-warning-border: var(--orange-alert-600);
+  --badge-light-warning-text: var(--orange-alert-300);
+
+  --badge-light-yellow-bg: var(--yellow-alert-800);
+  --badge-light-yellow-border: var(--yellow-alert-600);
+  --badge-light-yellow-text: var(--yellow-alert-300);
+
+  --badge-light-info-bg: var(--turquoise-alert-800);
+  --badge-light-info-border: var(--turquoise-alert-600);
+  --badge-light-info-text: var(--turquoise-alert-300);
+
+  --badge-light-danger-bg: var(--red-alert-800);
+  --badge-light-danger-border: var(--red-alert-600);
+  --badge-light-danger-text: var(--red-alert-300);
+
+  --badge-light-neutral-bg: var(--blue-primary-850);
+  --badge-light-neutral-border: var(--blue-primary-700);
+  --badge-light-neutral-text: rgba(250, 250, 250, 0.75);
+
+  /* Badge Specific - Medium variant in dark mode */
+  --badge-medium-primary-bg: var(--blue-primary-400);
+  --badge-medium-success-bg: var(--green-alert-400);
+  --badge-medium-warning-bg: var(--orange-alert-400);
+  --badge-medium-yellow-bg: var(--yellow-alert-400);
+  --badge-medium-info-bg: var(--turquoise-alert-400);
+  --badge-medium-danger-bg: var(--red-alert-400);
+  --badge-medium-neutral-bg: var(--blue-primary-700);
+
+  /* Semantic Tokens - Primary (Dark) */
+  --primary-bg: var(--blue-primary-200);
+  --primary-bg-hover: var(--blue-primary-100);
+  --primary-bg-press: var(--blue-primary-300);
+  --primary-border: var(--blue-primary-200);
+  --primary-text-on: var(--white-100);
+
+  /* Semantic Tokens - Neutral (Dark) */
+  --neutral-bg: #090f36; /* Main background dark mode */
+  --neutral-subtle: #19215a; /* Cards, tables, sections background dark mode */
+  --neutral-border: var(
+    --blue-primary-600
+  ); /* Border mais clara */
+  --neutral-icon: rgba(250, 250, 250, 0.75);
+  --neutral-text: var(--white-100);
+  --neutral-text-muted: rgba(250, 250, 250, 0.6);
+  --neutral-inverse: var(--blue-primary-950);
+
+  /* Header Specific (Dark) */
+  --header-bg: #0b1343; /* Header background dark mode */
+
+  /* Semantic Tokens - Feedback (Dark) */
+  --success-bg: var(--green-alert-400);
+  --success-text: var(--white-100);
+  --success-border: var(--green-alert-300);
+  --caution-bg: var(--yellow-alert-400);
+  --caution-text: var(--white-100);
+  --caution-border: var(--yellow-alert-300);
+  --warning-bg: var(--orange-alert-400);
+  --warning-text: var(--white-100);
+  --warning-border: var(--orange-alert-300);
+  --danger-bg: var(
+    --red-alert-200
+  ); /* Tom mais claro e aceso para dark mode */
+  --danger-text-on: var(--white-100);
+  --danger-border: var(--red-alert-300);
+  --info-bg: var(--turquoise-alert-400);
+  --info-text: var(--white-100);
+  --info-border: var(--turquoise-alert-300);
+
+  /* Semantic Tokens - States (Dark) */
+  --focus-ring: var(--blue-primary-200);
+  --disabled-bg: #19215a; /* Same as cards/sections */
+  --disabled-text: rgba(250, 250, 250, 0.4);
+  --table-row-hover: #19215a; /* Same as cards/sections */
+  --scrollbar-thumb: var(
+    --blue-primary-750
+  ); /* Scrollbar específico - tom diferente do accent */
+
+  /* Card Inner Elements (Dark) */
+  --card-inner-bg: #212e70; /* Differentiate inner divs within cards in dark mode */
+  --analytics-list-bg: #212e70; /* Analytics screen list items - dark mode */
+
+  /* Sidebar Tokens (Dark Mode) */
+  --sidebar: #102d8a; /* Sidebar dark mode */
+  --sidebar-foreground: var(--white-100); /* Texto branco */
+  --sidebar-border: var(--white-100); /* Bordas brancas */
+
+  /* Legacy mapping for compatibility (Dark) */
+  --background: var(
+    --neutral-bg
+  ); /* Uses #090F36 in dark mode */
+  --foreground: var(--white-100);
+  --card: #19215a; /* Card background específico */
+  --card-foreground: var(--white-100);
+  --popover: #19215a; /* Same as cards */
+  --popover-foreground: var(--white-100);
+  --primary: var(--blue-primary-200);
+  --primary-foreground: var(--white-100);
+  --secondary: #19215a; /* Same as cards */
+  --secondary-foreground: var(--white-100);
+  --muted: #19215a; /* Same as cards */
+  --muted-foreground: rgba(250, 250, 250, 0.6);
+  --accent: #19215a; /* Same as cards */
+  --accent-foreground: var(--white-100);
+  --destructive: var(
+    --red-alert-200
+  ); /* Tom mais claro e aceso */
+  --destructive-foreground: var(--white-100);
+  --border: var(--blue-primary-600); /* Border mais clara */
+  --input: transparent;
+  --input-background: #0b1343; /* Same as header - darker contrast with cards */
+  --input-border: var(--blue-primary-700);
+  --input-border-hover: var(--blue-primary-600);
+  --input-text: var(--white-100);
+  --input-placeholder: #fafafa;
+  --switch-background: var(--blue-primary-700);
+  --ring: var(--blue-primary-200);
+  --chart-1: var(--blue-primary-400);
+  --chart-2: var(--turquoise-alert-300);
+  --chart-3: var(--green-alert-400);
+  --chart-4: var(--orange-alert-400);
+  --chart-5: var(--red-alert-400);
+  --sidebar: var(--blue-primary-300);
+  --sidebar-foreground: var(--white-100);
+  --sidebar-primary: var(--blue-primary-400);
+  --sidebar-primary-foreground: var(--white-100);
+  --sidebar-accent: var(--blue-primary-200);
+  --sidebar-accent-foreground: var(--white-100);
+  --sidebar-border: var(--blue-primary-200);
+  --sidebar-ring: var(--blue-primary-100);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(
+    --sidebar-primary-foreground
+  );
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(
+    --sidebar-accent-foreground
+  );
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overflow: hidden;
+  }
+
+  html {
+    overflow: hidden;
+  }
+}
+
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(
+    :not(:has([class*=" text-"]), :not(:has([class^="text-"])))
+  ) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-semibold);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    td {
+      font-size: 14px;
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+}
+
+html {
+  font-size: var(--font-size);
+  font-family: "Inter", sans-serif;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--neutral-bg);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neutral-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-icon);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neutral-border) var(--neutral-bg);
+}
