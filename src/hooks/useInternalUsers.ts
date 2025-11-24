@@ -186,43 +186,6 @@ export function useInternalUsers(): UseInternalUsersReturn {
 
   useEffect(() => {
     fetchUsers();
-
-    // Subscrever a mudanças em tempo real
-    const subscription = supabase
-      .channel('internal_users_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'users',
-          filter: 'user_type=eq.admin',
-        },
-        (payload) => {
-          console.log('Internal user changed:', payload);
-
-          if (payload.eventType === 'INSERT' && payload.new) {
-            setUsers((prev) => [payload.new as InternalUser, ...prev]);
-          } else if (payload.eventType === 'UPDATE' && payload.new) {
-            setUsers((prev) =>
-              prev.map((user) =>
-                user.id === (payload.new as InternalUser).id
-                  ? (payload.new as InternalUser)
-                  : user
-              )
-            );
-          } else if (payload.eventType === 'DELETE' && payload.old) {
-            setUsers((prev) =>
-              prev.filter((user) => user.id !== (payload.old as InternalUser).id)
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [fetchUsers]);
 
   return {

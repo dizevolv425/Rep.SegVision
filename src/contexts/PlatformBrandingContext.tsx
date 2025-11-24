@@ -83,29 +83,6 @@ export const PlatformBrandingProvider: React.FC<{ children: React.ReactNode }> =
 
   useEffect(() => {
     fetchBranding();
-
-    // Subscrever a mudanças em tempo real
-    const subscription = supabase
-      .channel('platform_settings_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'platform_settings',
-        },
-        (payload) => {
-          console.log('Platform settings changed:', payload);
-          if (payload.eventType === 'UPDATE' && payload.new) {
-            setBranding(payload.new as PlatformBranding);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [fetchBranding]);
 
   const value: PlatformBrandingContextType = {

@@ -131,38 +131,6 @@ export function useNotificationPreferences(): UseNotificationPreferencesReturn {
 
   useEffect(() => {
     fetchPreferences();
-
-    // Subscrever a mudanças em tempo real
-    let subscription: ReturnType<typeof supabase.channel> | null = null;
-
-    supabase.auth.getUser().then((result) => {
-      if (result.data.user) {
-        subscription = supabase
-          .channel('user_notification_preferences_changes')
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'user_notification_preferences',
-              filter: `user_id=eq.${result.data.user.id}`,
-            },
-            (payload) => {
-              console.log('Notification preferences changed:', payload);
-              if (payload.new) {
-                setPreferences(payload.new as NotificationPreferences);
-              }
-            }
-          )
-          .subscribe();
-      }
-    });
-
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
   }, [fetchPreferences]);
 
   return {

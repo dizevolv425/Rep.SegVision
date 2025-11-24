@@ -146,49 +146,6 @@ export function useSecuritySettings(): UseSecuritySettingsReturn {
   useEffect(() => {
     fetchSettings();
     fetchLogs();
-
-    // Subscrever a mudanças em configurações de segurança
-    const settingsSubscription = supabase
-      .channel('security_settings_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'security_settings',
-        },
-        (payload) => {
-          console.log('Security settings changed:', payload);
-          if (payload.new) {
-            setSettings(payload.new as SecuritySettings);
-          }
-        }
-      )
-      .subscribe();
-
-    // Subscrever a novos logs de segurança
-    const logsSubscription = supabase
-      .channel('security_logs_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'security_logs',
-        },
-        (payload) => {
-          console.log('New security log:', payload);
-          if (payload.new) {
-            setLogs((prev) => [payload.new as SecurityLog, ...prev].slice(0, 50));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      settingsSubscription.unsubscribe();
-      logsSubscription.unsubscribe();
-    };
   }, [fetchSettings, fetchLogs]);
 
   return {
